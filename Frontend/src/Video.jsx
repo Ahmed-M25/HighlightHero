@@ -1,42 +1,54 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
+import axios from 'axios';
 
-const VideoImport = () => {
-    const [selectedFile, setSelectedFile] = useState(null);
-    const [videoSrc, setVideoSrc] = useState('');
-  
-    const handleFileChange = (event) => {
-      const file = event.target.files[0];
-      setSelectedFile(file);
-  
-      if (file) {
-        const videoUrl = URL.createObjectURL(file);
-        setVideoSrc(videoUrl);
-      }
-    };
-  
-    useEffect(() => {
-      return () => {
-        if (videoSrc) {
-          URL.revokeObjectURL(videoSrc);
-        }
-      };
-    }, [videoSrc]);
-  
-    return (
-      <div>
-        <input type="file" accept="video/*" onChange={handleFileChange} />
-        {videoSrc && (
-          <div>
-            <h3>Video Preview</h3>
-            <video width="320" height="240" controls>
-              <source src={videoSrc} type={selectedFile?.type || 'video/mp4'} />
-              Your browser does not support the video tag.
-            </video>
-          </div>
-        )}
-      </div>
-    );
+function VideoUpload() {
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [uploadMessage, setUploadMessage] = useState("");
+
+  const handleFileChange = (event) => {
+    setSelectedFile(event.target.files[0]);
   };
-  
-  export default VideoImport;
-  
+
+  const handleFileUpload = async (event) => {
+    event.preventDefault();
+
+    if (!selectedFile) {
+      setUploadMessage("Please select a file first.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("video", selectedFile);
+
+    try {
+      const response = await axios.post('http://localhost:5000/upload_video', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        withCredentials: true,
+      });
+      setUploadMessage(response.data.message);
+    } catch (error) {
+      if (error.response) {
+        setUploadMessage(`Error uploading file: ${error.response.status} - ${error.response.data.error}`);
+      } else if (error.request) {
+        setUploadMessage("No response from server.");
+      } else {
+        setUploadMessage("Error: " + error.message);
+      }
+    }
+  };
+
+  return (
+    <div>
+      <h2>Upload Video</h2>
+      <form onSubmit={handleFileUpload}>
+        <input type="file" onChange={handleFileChange} accept=".mp4,.avi,.mov,.mkv" />
+        <button type="submit">Upload</button>
+      </form>
+      {uploadMessage && <p>{uploadMessage}</p>}
+    </div>
+  );
+}
+
+export default VideoUpload;
