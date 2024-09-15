@@ -53,7 +53,7 @@ def process_video(file_path): # file_path is relative path
     chunk_narrations = []
     for chunk in chunks:
         response = requests.post(
-            "https://xpbowler--hackmit-model-generate.modal.run",
+            "https://ahmed-m25--hackmit-model-generate.modal.run",
             files ={
                 "file": open(chunk,'rb')
             }
@@ -139,7 +139,7 @@ def preprocess_video(input_path, output_path):
         print(f"Failed to preprocess video: {e}")
         return None
 
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import moviepy.audio.fx.all as afx
 
 def split_video_into_chunks(video_path, chunk_duration=8):
@@ -171,6 +171,14 @@ def split_video_into_chunks(video_path, chunk_duration=8):
 
 def generate_final_video(video_path, num_chunks):
 
+    # Load the BackGround Music
+    background_audio_path = './uploads/background.mp3'
+    print(f"Loading background audio from: {background_audio_path}")
+    background_audio = AudioFileClip(background_audio_path)
+    print(f"Background audio duration: {background_audio.duration}s")
+
+    background_audio = background_audio.volumex(0.3)
+
     for i in range(num_chunks):
         video_path = f"./chunks/chunk_{i}.mp4"
 
@@ -193,10 +201,13 @@ def generate_final_video(video_path, num_chunks):
         
         # Match audio duration to video duration
         narration_audio = narration_audio.fx(afx.audio_loop, duration=video_clip.duration)
+        background_audio = background_audio.copy().fx(afx.audio_loop, duration=video_clip.duration)
+
+        mixed_audio = CompositeAudioClip([background_audio, narration_audio])
         
         # Set the audio of the video clip as the narration audio
         print("Setting audio to video...")
-        final_video = video_clip.set_audio(narration_audio)
+        final_video = video_clip.set_audio(mixed_audio)
         
         # Define the output file path
         output_path = video_path.replace(".mp4", "_new.mp4").replace("chunks","final")

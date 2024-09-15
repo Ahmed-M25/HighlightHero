@@ -1,0 +1,15 @@
+.uploadArea {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+    text-align: center;
+}
+
+.chooseFileOverlay {
+    
+    color: white;
+    border: none;
+    border-radius: 4px;
+
+}
