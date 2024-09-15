@@ -34,12 +34,14 @@
   .text-container {
     position: relative;
     z-index: 2;
-    text-align: center;
+    text-align: left;
     color: #fff;
     padding: 0 20px;
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    flex-direction: row;
+    justify-content: space-between; 
+    align-items: center; 
+    margin-left: 10%;
     height: 100%;
   }
   
@@ -47,9 +49,9 @@
     font-size: 4vw;
     font-weight: bold;
     text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.7);
-    margin-bottom: 20px;
     line-height: 1.2;
     animation: fadeInUp 1s ease-in-out;
+    width: 600px;
   }
   
   .highlight {
@@ -64,20 +66,21 @@
     animation: fadeInUp 1.5s ease-in-out;
   }
   
-  .cta-button {
-    background: #f39c12;
-    border: none;
-    padding: 15px 30px;
-    font-size: 1.2vw;
+  .cta-text {
+    font-size: 2vw;
     font-weight: bold;
-    color: #fff;
-    cursor: pointer;
-    transition: background 0.3s ease;
-    animation: fadeInUp 2s ease-in-out;
+    color: #fff; 
+    cursor: pointer; 
+    border-radius: 25px;
+    margin-right: 17%;
+    border: transparent;
+    /* background: linear-gradient(90deg, #f39c12, #f1c40f); */
+    margin-top: 1%;
+    transition: color 0.3s ease; 
   }
   
-  .cta-button:hover {
-    background: #e67e22;
+  .cta-text:hover {
+    color: #e67e22; 
   }
   
   @keyframes fadeInUp {

@@ -19,14 +19,14 @@ function HomePage() {
       <div className="overlay"></div>
 
       <div className="text-container">
-        <h1 className="home-text">
-          Take a Step Forward in 
-          <span className="highlight"> Guaranteeing Your Sports Future</span>
-        </h1>
-        <p className="sub-text">
-          Join the next generation of athletes and make your mark on the world of sports.
-        </p>
-        <button className="cta-button" onClick={handleRedirect}>Get Started</button>
+        <div className='sync'>
+          <h1 className="home-text">
+            Make The Highlight of your
+            <span className=""> Dreams Today</span>
+          </h1>
+        </div>
+        {/* <a className="cta-text" onClick={handleRedirect}>Get Started</a> */}
+        <button className='cta-text' onClick={handleRedirect}>Get Started</button>
       </div>
     </div>
   );
