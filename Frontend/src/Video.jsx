@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import './VideoUpload.css';
 
 function VideoUpload() {
   const [selectedFile, setSelectedFile] = useState(null);
@@ -44,11 +45,38 @@ function VideoUpload() {
   };
 
   return (
-    <div>
+    <div class="uploadArea">
       <h2>Upload Video</h2>
       <form onSubmit={handleFileUpload}>
-        <input type="file" onChange={handleFileChange} accept=".mp4" />
-        <button type="submit">Upload</button>
+        <label htmlFor="file-upload" className="custom-file-upload" style={
+          {
+            marginTop: '10px',
+            marginRight: '5px',
+            padding: '8px 16px',
+            color: 'white',
+            background: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }
+        }>
+        Upload File
+        </label>
+        <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={
+          {display:'none'}
+          } />
+        <button type="submit" style={
+          {
+            marginTop: '10px',
+            marginLeft: '5px',
+            padding: '8px 16px',
+            color: 'white',
+            background: 'black',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }
+        }>Submit</button>
       </form>
       {uploadMessage && <p>{uploadMessage}</p>}
 
