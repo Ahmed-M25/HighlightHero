@@ -63,7 +63,7 @@ def process_video(file_path): # file_path is relative path
     narration_text = response.json().get('answer',None)
     if narration_text is None:
         return jsonify({'error': 'Failed to generate narration'}), 500
-    print("Narration text generation complete!")
+    print(f"Narration text generation complete! {narration_text}")
 
     narration_path = generate_narration_sound(narration_text[0])
     print("Narration sound generation complete!")
@@ -103,6 +103,7 @@ def preprocess_video(input_path, output_path):
     try:
         command = [
             'ffmpeg',
+            '-y',
             '-i', input_path,
             '-c', 'copy',
             '-video_track_timescale', '24',  # Set this to your desired default FPS
