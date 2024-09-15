@@ -31,7 +31,7 @@ function VideoUpload() {
 
       const { file_path } = response.data;
       setUploadMessage("File uploaded and processed successfully!");
-      setVideoUrl(`http://127.0.0.1:5000/backend/uploads/${file_path.split('/').pop()}`); 
+      setVideoUrl(`../../backend/uploads/${file_path.split('/').pop()}`); 
     } catch (error) {
       if (error.response) {
         setUploadMessage(`Error uploading file: ${error.response.status} - ${error.response.data.error}`);
