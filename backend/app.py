@@ -109,7 +109,7 @@ def preprocess_video(input_path, output_path):
         print(f"Failed to preprocess video: {e}")
         return None
 
-from moviepy.editor import VideoFileClip, AudioFileClip
+from moviepy.editor import VideoFileClip, AudioFileClip, CompositeAudioClip
 import moviepy.audio.fx.all as afx
 
 def generate_final_video(narration_path, video_path):
@@ -120,6 +120,15 @@ def generate_final_video(narration_path, video_path):
     print(f"Loading narration audio from: {narration_path}")
     narration_audio = AudioFileClip(narration_path, fps=44100)
     print(f"Narration audio duration: {narration_audio.duration}s")
+
+    # Load the BackGround Music
+    background_audio_path = './uploads/background.mp3'
+    print(f"Loading background audio from: {background_audio_path}")
+    background_audio = AudioFileClip(background_audio_path)
+    print(f"Background audio duration: {background_audio.duration}s")
+
+    background_audio = background_audio.volumex(0.3)
+
 
     # Load the video file
     print(f"Loading video from: {new_video_path}")
@@ -134,10 +143,13 @@ def generate_final_video(narration_path, video_path):
     
     # Match audio duration to video duration
     narration_audio = narration_audio.fx(afx.audio_loop, duration=video_clip.duration)
+    background_audio = background_audio.fx(afx.audio_loop, duration=video_clip.duration)
+
+    mixed_audio = CompositeAudioClip([background_audio, narration_audio])
     
     # Set the audio of the video clip as the narration audio
     print("Setting audio to video...")
-    final_video = video_clip.set_audio(narration_audio)
+    final_video = video_clip.set_audio(mixed_audio)
     
     # Define the output file path
     output_path = new_video_path.replace('.mp4', '_with_audio.mp4')
