@@ -2,6 +2,7 @@
 import os
 import warnings
 import modal
+import json
 import numpy as np
 from transformers import Qwen2VLForConditionalGeneration, AutoProcessor
 from qwen_vl_utils import process_vision_info
@@ -42,14 +43,16 @@ vlm_image = (
         "accelerate>=0.26.0",
         "huggingface_hub",
         "numpy<2",
-        "qwen_vl_utils"
+        "qwen_vl_utils",
+        "moviepy"
     )
     .run_function(  # download the model by running a Python function
         download_model_to_image
     )
 )
 
-
+from moviepy.editor import VideoFileClip
+from fastapi import FastAPI, File, UploadFile, Form
 app = modal.App("hackmit")
 @app.cls(
     gpu=GPU_CONFIG,
@@ -72,20 +75,30 @@ class Model:
         print("Video processing runtime initialized.")
 
     @modal.web_endpoint(method="POST", docs=True)
-    def generate(self, request: dict):
-        file = request.files.get("file")
-        file.save("/resources/video.mp4")
+    async def generate(self, file: UploadFile = File(...)):
+        # Read the video file
+        print(file.filename)
+        # Folder where uploaded files will be stored
+        UPLOAD_DIRECTORY = "/uploaded_files"
+        os.makedirs(UPLOAD_DIRECTORY, exist_ok=True)
+
+        file_location = f"{UPLOAD_DIRECTORY}/{file.filename}"
+
+        with open(file_location, "wb") as data:
+            while content := await file.read(1024):  # Read chunks of 1024 bytes
+                data.write(content)
+
         messages = [
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "video",
-                        "video": "file:///resources/video.mp4",
+                        "video": f"file:///uploaded_files/{file.filename}",
                         "fps": 1.0,
                         "max_pixels": 512 * 512,
                     },
-                    {"type": "text", "text": request.get("prompt")},
+                    {"type": "text", "text": "Narrate this video as if you were a sports commentator."},
                 ],
             }
         ]
