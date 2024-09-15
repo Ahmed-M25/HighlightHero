@@ -1,18 +1,22 @@
-import { useState } from 'react'
-import Background from './assets/catVideo.mp4'
-import VideoImport from './Video.jsx' // Import the correct component
+import React from 'react'
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
+import HomePage from "./components/home"
+import AboutPage from "./components/about"
+import UploadPage from "./components/upload"
+
 import './App.css'
 
 function App() {
   return (
-    <div className="app-container">
-      <video autoPlay loop muted className="background-video">
-        <source src={Background} type="video/mp4" />
-      </video>
-      <div className="content-overlay">
-        <VideoImport />  {/* Render VideoImport here */}
-      </div>
-    </div>
+    <Router>
+      <main>
+        <Routes>
+          <Route path='/' element={<HomePage/>} />
+          <Route path="/about" element={<AboutPage/>} />
+          <Route path="/upload" element={<UploadPage/>} />
+        </Routes>
+      </main>
+    </Router>
   )
 }
 
