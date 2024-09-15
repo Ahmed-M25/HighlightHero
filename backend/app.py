@@ -67,6 +67,9 @@ def process_video(file_path): # file_path is relative path
     for (index,narration) in enumerate(chunk_narrations):
         if is_interesting(narration):
             generate_narration_sound(narration, index)
+        else:
+            generate_narration_sound(narration, index)
+
 
     print("Narration sound generation complete!")
 
@@ -89,7 +92,8 @@ def is_interesting(narration):
             }
         ]
     )
-    msg = completion.choices[0].message
+    msg = completion.choices[0].message.content
+    print(msg)
     if "true" in msg.lower():
         return True
     else:
@@ -156,7 +160,6 @@ def split_video_into_chunks(video_path, chunk_duration=8):
     for i in range(num_chunks):
         start_time = i * chunk_duration
         end_time = min((i + 1) * chunk_duration, total_duration)
-        print(start_time, end_time)
         # Create a subclip for each chunk
         chunk = video.subclip(start_time, end_time)
         
@@ -237,7 +240,7 @@ def generate_final_video_inner():
 
 
     # FFmpeg command to concatenate videos
-    command = 'ffmpeg -f concat -safe 0 -i filelist.txt -c copy ./uploads/output.mp4'
+    command = 'ffmpeg -y -f concat -safe 0 -i filelist.txt -c copy ../Frontend/output.mp4'
     subprocess.run(command, shell=True)
 
     # Remove the temporary file
@@ -249,11 +252,9 @@ import shutil
 def cleanup():
     shutil.rmtree('./chunks')
     shutil.rmtree('./final')
-    shutil.rmtree('./uploads')
     
     os.makedirs('./chunks')
     os.makedirs('./final')
-    os.makedirs('./uploads')
 
 if __name__ == '__main__':
     app.run(debug=True)

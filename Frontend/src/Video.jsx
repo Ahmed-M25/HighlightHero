@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
+import ReactPlayer from 'react-player';
 import './VideoUpload.css';
 
 function VideoUpload() {
@@ -30,9 +31,8 @@ function VideoUpload() {
         withCredentials: true,
       });
 
-      const { file_path } = response.data;
-      setUploadMessage("File uploaded and processed successfully!");
-      setVideoUrl(`../../backend/uploads/${file_path.split('/').pop()}`); 
+      // Using the file path returned from the server as the video URL
+      setVideoUrl('output.mp4');
     } catch (error) {
       if (error.response) {
         setUploadMessage(`Error uploading file: ${error.response.status} - ${error.response.data.error}`);
@@ -48,7 +48,7 @@ function VideoUpload() {
     <div style={{
       backgroundColor: 'black',
       color: 'white',
-      minHeight: '100vh', // Ensures full height background
+      minHeight: '100vh',
       width: '100vw',
       display: 'flex',
       flexDirection: 'column',
@@ -58,8 +58,7 @@ function VideoUpload() {
       <div>
         <h2>Upload Video</h2>
         <form onSubmit={handleFileUpload}>
-          <label htmlFor="file-upload" className="custom-file-upload" style={
-            {
+          <label htmlFor="file-upload" className="custom-file-upload" style={{
               marginTop: '10px',
               marginRight: '5px',
               padding: '8px 16px',
@@ -68,15 +67,11 @@ function VideoUpload() {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'
-            }
-          }>
-          Upload File
+            }}>
+            Upload File
           </label>
-          <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={
-            {display:'none'}
-            } />
-          <button type="submit" style={
-            {
+          <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={{display:'none'}} />
+          <button type="submit" style={{
               marginTop: '10px',
               marginLeft: '5px',
               padding: '8px 16px',
@@ -85,20 +80,16 @@ function VideoUpload() {
               border: 'none',
               borderRadius: '4px',
               cursor: 'pointer'
-            }
-          }>Submit</button>
+            }}>Submit</button>
         </form>
         {uploadMessage && <p>{uploadMessage}</p>}
       </div>
-
+      <br/>
+      <br/>
       {videoUrl && (
-        <div>
-          <h3>Processed Video</h3>
-          <video controls width="600">
-            <source src={videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-        </div>
+        <video controls width="1200">
+          <source src={videoUrl} type="video/mp4"/>
+        </video>
       )}
     </div>
   );
