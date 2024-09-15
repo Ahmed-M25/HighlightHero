@@ -69,7 +69,8 @@
   .cta-text {
     font-size: 2vw;
     font-weight: bold;
-    color: #fff; 
+    background: linear-gradient(to right, #323ad7, #4a1995);
+    color: white; 
     cursor: pointer; 
     border-radius: 25px;
     margin-right: 17%;
@@ -80,7 +81,7 @@
   }
   
   .cta-text:hover {
-    color: #e67e22; 
+    color: #000000; 
   }
   
   @keyframes fadeInUp {
