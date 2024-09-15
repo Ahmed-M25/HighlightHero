@@ -45,40 +45,51 @@ function VideoUpload() {
   };
 
   return (
-    <div class="uploadArea">
-      <h2>Upload Video</h2>
-      <form onSubmit={handleFileUpload}>
-        <label htmlFor="file-upload" className="custom-file-upload" style={
-          {
-            marginTop: '10px',
-            marginRight: '5px',
-            padding: '8px 16px',
-            color: 'white',
-            background: 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }
-        }>
-        Upload File
-        </label>
-        <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={
-          {display:'none'}
-          } />
-        <button type="submit" style={
-          {
-            marginTop: '10px',
-            marginLeft: '5px',
-            padding: '8px 16px',
-            color: 'white',
-            background: 'black',
-            border: 'none',
-            borderRadius: '4px',
-            cursor: 'pointer'
-          }
-        }>Submit</button>
-      </form>
-      {uploadMessage && <p>{uploadMessage}</p>}
+    <div style={{
+      backgroundColor: 'black',
+      color: 'white',
+      minHeight: '100vh', // Ensures full height background
+      width: '100vw',
+      display: 'flex',
+      flexDirection: 'column',
+      justifyContent: 'center',
+      alignItems: 'center',
+    }}>
+      <div>
+        <h2>Upload Video</h2>
+        <form onSubmit={handleFileUpload}>
+          <label htmlFor="file-upload" className="custom-file-upload" style={
+            {
+              marginTop: '10px',
+              marginRight: '5px',
+              padding: '8px 16px',
+              color: 'black',
+              background: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }
+          }>
+          Upload File
+          </label>
+          <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={
+            {display:'none'}
+            } />
+          <button type="submit" style={
+            {
+              marginTop: '10px',
+              marginLeft: '5px',
+              padding: '8px 16px',
+              color: 'black',
+              background: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer'
+            }
+          }>Submit</button>
+        </form>
+        {uploadMessage && <p>{uploadMessage}</p>}
+      </div>
 
       {videoUrl && (
         <div>
