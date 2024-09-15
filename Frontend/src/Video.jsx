@@ -47,7 +47,7 @@ function VideoUpload() {
     <div>
       <h2>Upload Video</h2>
       <form onSubmit={handleFileUpload}>
-        <input type="file" onChange={handleFileChange} accept=".mp4,.avi,.mov,.mkv" />
+        <input type="file" onChange={handleFileChange} accept=".mp4" />
         <button type="submit">Upload</button>
       </form>
       {uploadMessage && <p>{uploadMessage}</p>}
