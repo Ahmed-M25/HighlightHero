@@ -34,10 +34,7 @@ def download_model_to_image():
     # otherwise, this happens on first inference
     transformers.utils.move_cache()
 
-
-# Modal runs Python functions on containers in the cloud.
-# The environment those functions run in is defined by the container's `Image`.
-# The block of code below defines our example's `Image`.
+local_assets = modal.Mount.from_local_dir(local_path="./resources",remote_path="/resources",recursive=True)
 
 key = modal.Secret.from_name("ghp_")
 vlm_image = (
@@ -51,6 +48,7 @@ vlm_image = (
         "torch",
         "torchvision",
         "torchaudio",
+        "av",
         "accelerate>=0.26.0",
         "huggingface_hub",
         "numpy<2",
@@ -73,7 +71,8 @@ app = modal.App("hackmit")
     timeout=20 * MINUTES,
     container_idle_timeout=20 * MINUTES,
     allow_concurrent_inputs=100,
-    image=vlm_image,  # Update if needed based on new requirements
+    image=vlm_image,
+    mounts=[local_assets],
 )
 class Model:
     def __init__(self):
@@ -85,7 +84,6 @@ class Model:
     @modal.enter()
     def start_runtime(self):
         """Initializes video processing capabilities."""
-        # Perform any necessary initialization here
         print("Video processing runtime initialized.")
 
     @modal.web_endpoint(method="POST", docs=True)
@@ -96,10 +94,12 @@ class Model:
                 "role": "user",
                 "content": [
                     {
-                        "type": "image",
-                        "image": "https://qianwen-res.oss-cn-beijing.aliyuncs.com/Qwen-VL/assets/demo.jpeg",
+                        "type": "video",
+                        "video": "file:///resources/cat.mp4",
+                        "fps": 1.0,
+                        "max_pixels": 512 * 512,
                     },
-                    {"type": "text", "text": "Describe this image."},
+                    {"type": "text", "text": request.get("question")},
                 ],
             }
         ]
