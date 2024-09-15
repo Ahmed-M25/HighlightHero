@@ -8,10 +8,6 @@ from flask_cors import CORS
 app = Flask(__name__)
 CORS(app, supports_credentials=True)
 
-
-
-
-
 # Hyperparameters
 PROMPT = "Narrate this video as if you were a sports commentator."
 UPLOAD_FOLDER = './uploads/'
@@ -51,7 +47,6 @@ def upload_video():
         return jsonify({'error': 'File type not allowed'}), 400
 
 def process_video(file_path): # file_path is relative path
-
     print("Starting video processing...")
     response = requests.post(
         "https://xpbowler--hackmit-model-generate.modal.run",
@@ -68,10 +63,10 @@ def process_video(file_path): # file_path is relative path
     narration_path = generate_narration_sound(narration_text[0])
     print("Narration sound generation complete!")
 
-    generate_final_video(narration_path, VIDEO_PATH)
+    final_video_path = generate_final_video(narration_path, VIDEO_PATH)
     print("Final video generation complete!")
 
-    return jsonify({'file_path': file_path})
+    return jsonify({'file_path': final_video_path})
 
 def generate_narration_sound(narration_text):
     headers = {
