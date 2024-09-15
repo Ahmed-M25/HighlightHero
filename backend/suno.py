@@ -98,7 +98,7 @@ def download_content(clip):
     else:
         print("No audio URL available.")
 
-def main():
+def get_music():
     clip_id = generate_instrumental_song()
     if clip_id:
         clip = poll_clip(clip_id)
@@ -108,6 +108,3 @@ def main():
             print("Failed to retrieve generated clip.")
     else:
         print("Generation failed.")
-
-if __name__ == "__main__":
-    main()

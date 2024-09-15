@@ -1,5 +1,6 @@
 # Run python app.py from inside the backend directory
 
+import asyncio
 import os
 import requests
 from flask import Flask, jsonify, request
@@ -48,27 +49,55 @@ def upload_video():
 
 def process_video(file_path): # file_path is relative path
     print("Starting video processing...")
-    response = requests.post(
-        "https://xpbowler--hackmit-model-generate.modal.run",
-        files ={
-            "file": open(file_path,'rb')
-        }
-    )
+    (chunks,num_chunks) = split_video_into_chunks(file_path)
+    chunk_narrations = []
+    for chunk in chunks:
+        response = requests.post(
+            "https://xpbowler--hackmit-model-generate.modal.run",
+            files ={
+                "file": open(chunk,'rb')
+            }
+        )
+        chunk_narrations.append(response.json().get('answer',None)[0])
+        if chunk_narrations is None:
+            return jsonify({'error': 'Failed to generate narration'}), 500
+        
+    print(f"Narration text generation complete! {chunk_narrations}")
 
-    narration_text = response.json().get('answer',None)
-    if narration_text is None:
-        return jsonify({'error': 'Failed to generate narration'}), 500
-    print(f"Narration text generation complete! {narration_text}")
+    for (index,narration) in enumerate(chunk_narrations):
+        if is_interesting(narration):
+            generate_narration_sound(narration, index)
 
-    narration_path = generate_narration_sound(narration_text[0])
     print("Narration sound generation complete!")
 
-    final_video_path = generate_final_video(narration_path, VIDEO_PATH)
+    final_video_path = generate_final_video(VIDEO_PATH, num_chunks)
     print("Final video generation complete!")
 
     return jsonify({'file_path': final_video_path})
 
-def generate_narration_sound(narration_text):
+from openai import OpenAI
+client = OpenAI()
+
+def is_interesting(narration):
+    completion = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {
+                "role": "user",
+                "content": f"Return True or False, indicating whether this narration indicates anything of interest going on, with respect to sports. Return True only if a significant event has happened: {narration}"
+            }
+        ]
+    )
+    msg = completion.choices[0].message
+    if "true" in msg.lower():
+        return True
+    else:
+        return False
+
+
+def generate_narration_sound(narration_text, index):
+
     headers = {
     "Accept": "audio/mpeg",
     "Content-Type": "application/json",
@@ -84,7 +113,7 @@ def generate_narration_sound(narration_text):
     }
 
     response = requests.post(ELEVENLABS_BASE_URL+VOICE_ID, json=data, headers=headers)
-    narration_path = f"{UPLOAD_FOLDER}narration.mp3"
+    narration_path = f"./chunks/narration_{index}.mp3"
     with open(narration_path, 'wb') as f:
         for chunk in response.iter_content(chunk_size=CHUNK_SIZE):
             if chunk:
@@ -113,47 +142,107 @@ def preprocess_video(input_path, output_path):
 from moviepy.editor import VideoFileClip, AudioFileClip
 import moviepy.audio.fx.all as afx
 
-def generate_final_video(narration_path, video_path):
-    new_video_path = "./uploads/new_video.mp4"
-    preprocess_video(video_path, new_video_path)  # Ensure this function logs its output
+def split_video_into_chunks(video_path, chunk_duration=8):
+    res = []
+    # Load the video
+    video = VideoFileClip(video_path)
+    
+    # Get the total duration of the video
+    total_duration = video.duration
+    
+    # Calculate the number of chunks
+    num_chunks = int(total_duration // chunk_duration)
+    # Split the video into chunks
+    for i in range(num_chunks):
+        start_time = i * chunk_duration
+        end_time = min((i + 1) * chunk_duration, total_duration)
+        print(start_time, end_time)
+        # Create a subclip for each chunk
+        chunk = video.subclip(start_time, end_time)
+        
+        # Write the chunk to a file
+        output_filename = f"./chunks/chunk_{i}.mp4"
+        chunk.write_videofile(output_filename, codec="libx264")
+        res.append(output_filename)
+        chunk.close()
+    
+    return (res, num_chunks)
 
-    # Load the audio file
-    print(f"Loading narration audio from: {narration_path}")
-    narration_audio = AudioFileClip(narration_path, fps=44100)
-    print(f"Narration audio duration: {narration_audio.duration}s")
 
-    # Load the video file
-    print(f"Loading video from: {new_video_path}")
-    video_clip = VideoFileClip(new_video_path)
+def generate_final_video(video_path, num_chunks):
+
+    for i in range(num_chunks):
+        video_path = f"./chunks/chunk_{i}.mp4"
+
+        narration_path = f"./chunks/narration_{i}.mp3"
+        if not os.path.exists(narration_path):
+            pass
+        # Load the audio file
+        narration_audio = AudioFileClip(narration_path, fps=44100)
+
+        # Load the video file
+        print(f"Loading video from: {video_path}")
+        video_clip = VideoFileClip(video_path)
+        
+        # Check for fps in the video
+        if 'video_fps' not in video_clip.reader.infos:
+            video_clip.reader.fps = 24
+            print("FPS set to default 24.")
+        else:
+            print(f"Video FPS: {video_clip.reader.fps}")
+        
+        # Match audio duration to video duration
+        narration_audio = narration_audio.fx(afx.audio_loop, duration=video_clip.duration)
+        
+        # Set the audio of the video clip as the narration audio
+        print("Setting audio to video...")
+        final_video = video_clip.set_audio(narration_audio)
+        
+        # Define the output file path
+        output_path = video_path.replace(".mp4", "_new.mp4").replace("chunks","final")
+        
+        # Write the result to a file
+        print(f"Writing final video to: {output_path}")
+        final_video.write_videofile(output_path, codec='libx264', audio_codec='aac')
+        
+        # Close clips to free resources
+        narration_audio.close()
+        video_clip.close()
+        final_video.close()
+
+    generate_final_video_inner()
+
+def generate_final_video_inner():
+    video_dir = './final/'
+    os.listdir(video_dir)
+    # List of video files
+    video_files = ["./final/"+f for f in os.listdir(video_dir) if f.endswith('.mp4')]
+    print(video_files)
+
+    # Create a temporary text file listing all video files
+    with open('filelist.txt', 'w') as file:
+        for video in video_files:
+            file.write(f"file '{video}'\n")
+
+
+    # FFmpeg command to concatenate videos
+    command = 'ffmpeg -f concat -safe 0 -i filelist.txt -c copy ./uploads/output.mp4'
+    subprocess.run(command, shell=True)
+
+    # Remove the temporary file
+    os.remove('filelist.txt')
+
+    cleanup()
+
+import shutil
+def cleanup():
+    shutil.rmtree('./chunks')
+    shutil.rmtree('./final')
+    shutil.rmtree('./uploads')
     
-    # Check for fps in the video
-    if 'video_fps' not in video_clip.reader.infos:
-        video_clip.reader.fps = 24
-        print("FPS set to default 24.")
-    else:
-        print(f"Video FPS: {video_clip.reader.fps}")
-    
-    # Match audio duration to video duration
-    narration_audio = narration_audio.fx(afx.audio_loop, duration=video_clip.duration)
-    
-    # Set the audio of the video clip as the narration audio
-    print("Setting audio to video...")
-    final_video = video_clip.set_audio(narration_audio)
-    
-    # Define the output file path
-    output_path = new_video_path.replace('.mp4', '_with_audio.mp4')
-    
-    # Write the result to a file
-    print(f"Writing final video to: {output_path}")
-    final_video.write_videofile(output_path, codec='libx264', audio_codec='aac')
-    
-    # Close clips to free resources
-    narration_audio.close()
-    video_clip.close()
-    final_video.close()
-    
-    # Return the path of the final video
-    return output_path
+    os.makedirs('./chunks')
+    os.makedirs('./final')
+    os.makedirs('./uploads')
 
 if __name__ == '__main__':
     app.run(debug=True)
