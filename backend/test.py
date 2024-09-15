@@ -1,14 +1,9 @@
-from sgl_vlm import Model
 import requests
 
-model = Model()
-prompt="Narrate this video as if you were a sports commentator."
-response = requests.post(
-    "https://xpbowler--hackmit-model-generate.modal.run",
-    json={
-        "prompt": prompt,
-    },
-    files={"file"}
-)
+url = "https://xpbowler--hackmit-model-generate.modal.run"
+file_path = './resources/dog.mp4'
+files = {'file': open(file_path, 'rb')}
+
+response = requests.post(url, files=files)
 
 print(response.json().get('answer',None))
