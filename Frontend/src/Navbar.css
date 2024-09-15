@@ -1,0 +1,27 @@
+.navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.8);
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0;
+    z-index: 1000;
+  }
+  
+  .navbar.visible {
+    opacity: 1;
+  }
+  
+  .navbar ul {
+    list-style-type: none;
+    padding: 10px;
+    display: flex;
+    justify-content: space-around;
+  }
+  
+  .navbar ul li a {
+    color: white;
+    text-decoration: none;
+    padding: 10px;
+  }
+  
