@@ -25,13 +25,7 @@ const VideoImport = () => {
 
   return (
     <div>
-      <h2>Video Import</h2>
-      <input 
-        type="file" 
-        accept="video/*" 
-        onChange={handleFileChange} 
-        style={{ marginBottom: '20px' }}
-      />
+      {/* put fade in buttons here */}
       {videoSrc && (
         <div>
           <h3>Video Preview</h3>
