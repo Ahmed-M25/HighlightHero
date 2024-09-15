@@ -6,7 +6,8 @@ import './VideoUpload.css';
 function VideoUpload() {
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadMessage, setUploadMessage] = useState("");
-  const [videoUrl, setVideoUrl] = useState(""); // Store the URL of the processed video
+  const [videoUrl, setVideoUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleFileChange = (event) => {
     setSelectedFile(event.target.files[0]);
@@ -22,6 +23,8 @@ function VideoUpload() {
 
     const formData = new FormData();
     formData.append("video", selectedFile);
+
+    setIsLoading(true);
 
     try {
       const response = await axios.post('http://127.0.0.1:5000/upload_video', formData, {
@@ -41,6 +44,8 @@ function VideoUpload() {
       } else {
         setUploadMessage("Error: " + error.message);
       }
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,29 +64,30 @@ function VideoUpload() {
         <h2>Upload Video</h2>
         <form onSubmit={handleFileUpload}>
           <label htmlFor="file-upload" className="custom-file-upload" style={{
-              marginTop: '10px',
-              marginRight: '5px',
-              padding: '8px 16px',
-              color: 'black',
-              background: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>
+            marginTop: '10px',
+            marginRight: '5px',
+            padding: '8px 16px',
+            color: 'black',
+            background: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }}>
             Upload File
           </label>
-          <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={{display:'none'}} />
+          <input id="file-upload" type="file" onChange={handleFileChange} accept=".mp4" style={{ display: 'none' }} />
           <button type="submit" style={{
-              marginTop: '10px',
-              marginLeft: '5px',
-              padding: '8px 16px',
-              color: 'black',
-              background: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer'
-            }}>Submit</button>
+            marginTop: '10px',
+            marginLeft: '5px',
+            padding: '8px 16px',
+            color: 'black',
+            background: 'white',
+            border: 'none',
+            borderRadius: '4px',
+            cursor: 'pointer'
+          }} disabled={isLoading}>Submit</button>
         </form>
+        {isLoading && <p>Processing...</p>}
         {uploadMessage && <p>{uploadMessage}</p>}
       </div>
       <br/>
