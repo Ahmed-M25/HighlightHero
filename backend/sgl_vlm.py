@@ -25,7 +25,7 @@ def download_model_to_image():
     transformers.utils.move_cache()
 
 
-local_assets = modal.Mount.from_local_dir(local_path="./resources",remote_path="/resources",recursive=True)
+# local_assets = modal.Mount.from_local_dir(local_path="./resources",remote_path="/resources",recursive=True)
 key = modal.Secret.from_name("ghp_")
 vlm_image = (
     modal.Image.debian_slim(python_version="3.11")
@@ -57,7 +57,7 @@ app = modal.App("hackmit")
     container_idle_timeout=20 * MINUTES,
     allow_concurrent_inputs=100,
     image=vlm_image,
-    mounts=[local_assets],
+    # mounts=[local_assets],
 )
 class Model:
     def __init__(self):
@@ -73,14 +73,15 @@ class Model:
 
     @modal.web_endpoint(method="POST", docs=True)
     def generate(self, request: dict):
-        
+        file = request.files.get("file")
+        file.save("/resources/video.mp4")
         messages = [
             {
                 "role": "user",
                 "content": [
                     {
                         "type": "video",
-                        "video": "file:///resources/cat.mp4",
+                        "video": "file:///resources/video.mp4",
                         "fps": 1.0,
                         "max_pixels": 512 * 512,
                     },

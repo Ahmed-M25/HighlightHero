@@ -8,6 +8,7 @@ response = requests.post(
     json={
         "prompt": prompt,
     },
+    files={"file"}
 )
 
 print(response.json().get('answer',None))

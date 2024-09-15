@@ -53,12 +53,16 @@ def upload_video():
 def process_video(file_path): # file_path is relative path
 
     print("Starting video processing...")
-    response = requests.post(
-        "https://xpbowler--hackmit-model-generate.modal.run",
-        json={
-            "prompt": PROMPT,
-        },
-    )
+    with open(file_path, 'rb') as f:
+        response = requests.post(
+            "https://xpbowler--hackmit-model-generate.modal.run",
+            json={
+                "prompt": PROMPT,
+            },
+            files ={
+                "file": f
+            }
+        )
 
     narration_text = response.json().get('answer',None)
     if narration_text is None:
