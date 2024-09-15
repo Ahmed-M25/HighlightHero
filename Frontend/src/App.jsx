@@ -1,8 +1,6 @@
 import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import Background from './assets/IMG_8670.mp4'
-import Video from './Video.jsx'
+import Background from './assets/catVideo.mp4'
+import VideoImport from './Video.jsx' // Import the correct component
 import './App.css'
 
 function App() {
@@ -12,7 +10,7 @@ function App() {
         <source src={Background} type="video/mp4" />
       </video>
       <div className="content-overlay">
-        <Video />
+        <VideoImport />  {/* Render VideoImport here */}
       </div>
     </div>
   )
